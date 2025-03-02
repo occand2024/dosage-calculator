@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+</head>
+<body>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>PPM Calculator</title>
+</head>
+<body>
+  <a style="position: fixed; top: -1px; right: -1px; padding-top: 5px; padding-right: 10px; padding-bottom: 5px; padding-left: 10px; background-image: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(204, 204, 204); color: rgb(51, 51, 51); text-shadow: rgb(255, 255, 255) 0px 1px 1px; border-top-right-radius: 5px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: solid; border-top-color: rgb(153, 153, 153); border-right-color: rgb(153, 153, 153); border-bottom-color: rgb(153, 153, 153); border-left-color: rgb(153, 153, 153); border-image: initial; text-decoration: none; font-family: 'Helvetica Neue', Arial, Helvetica; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; -webkit-transition-property: opacity; -webkit-transition-duration: 100ms; -webkit-transition-timing-function: ease-out; -webkit-transition-delay: initial; opacity: 0; background-position: initial initial; background-repeat: initial initial; " href="/evifil/edit">Edit in jsbin.com</a>
+<div style="max-width: 400px; margin: 20px auto; font-family: Arial, sans-serif;">
+    <h2>PPM Dosage Calculator</h2>
+    
+    <label for="targetPpm">Target Dosage (ppm):</label>
+    <input type="number" id="targetPpm" step="any" placeholder="e.g. 10" style="width: 100%; margin-bottom: 10px;" />
+    
+    <label for="percentActive">% Active (by weight):</label>
+    <input type="number" id="percentActive" step="any" placeholder="e.g. 50" style="width: 100%; margin-bottom: 10px;" />
+    
+    <label for="treatedVolumeGal">Treated Volume (gallons):</label>
+    <input type="number" id="treatedVolumeGal" step="any" placeholder="e.g. 1000" style="width: 100%; margin-bottom: 10px;" />
+
+    <label for="specificGravity">Specific Gravity:</label>
+    <input type="number" id="specificGravity" step="any" placeholder="e.g. 1.05" style="width: 100%; margin-bottom: 10px;" />
+    
+    <button id="calculateBtn" style="width: 100%; margin-bottom: 10px;">Calculate</button>
+    
+    <div id="results" style="font-weight: bold; text-align: center;"></div>
+</div>
+
+<script>
+(function() {
+    // Once the page loads, attach the event listener to the button
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('calculateBtn').addEventListener('click', calculateResults);
+    });
+
+    function calculateResults() {
+        // Gather inputs
+        var ppm = parseFloat(document.getElementById('targetPpm').value);
+        var percentActive = parseFloat(document.getElementById('percentActive').value);
+        var volumeGal = parseFloat(document.getElementById('treatedVolumeGal').value);
+        var specGrav = parseFloat(document.getElementById('specificGravity').value);
+
+        // Reference to results div
+        var resultsDiv = document.getElementById('results');
+        
+        // Basic validation
+        if (
+            isNaN(ppm) || ppm <= 0 ||
+            isNaN(percentActive) || percentActive <= 0 || percentActive > 100 ||
+            isNaN(volumeGal) || volumeGal <= 0 ||
+            isNaN(specGrav) || specGrav <= 0
+        ) {
+            resultsDiv.textContent = "Please enter valid positive numbers (and % Active <= 100).";
+            return;
+        }
+
+        // 1) Calculate total mg of active needed
+        //    1 ppm = 1 mg per liter (approx for water),
+        //    1 US gallon ~ 3.785411784 liters
+        var mgActiveNeeded = ppm * volumeGal * 3.785411784;
+
+        // 2) Convert mg active -> lbs active
+        //    1 lb = 453592.37 mg
+        var lbsActiveNeeded = mgActiveNeeded / 453592.37;
+
+        // 3) % Active means fractionActive = percentActive / 100
+        var fractionActive = percentActive / 100;
+
+        //    Weight of total solution needed (lbs)
+        var lbsSolution = lbsActiveNeeded / fractionActive;
+
+        // 4) Volume of solution in gallons
+        //    Water is ~8.34 lb/gal, so solution is 8.34 * specGrav lb/gal
+        //    volume_solutions_gal = (total lbs) / (8.34 * specGrav)
+        var volumeSolutionGal = lbsSolution / (8.34 * specGrav);
+
+        // 5) Convert gallons to fluid ounces
+        //    1 gallon = 128 fl oz
+        var volumeSolutionFlOz = volumeSolutionGal * 128;
+
+        // Round results a bit for display
+        var volOzRounded = volumeSolutionFlOz.toFixed(2);
+        var wtSolRounded = lbsSolution.toFixed(3);
+        var wtActiveRounded = lbsActiveNeeded.toFixed(3);
+
+        // Display
+        resultsDiv.innerHTML = 
+            "Volume of Solution (fl oz): " + volOzRounded + "<br/>" +
+            "Weight of Solution (lbs): " + wtSolRounded + "<br/>" +
+            "Weight of Active Chemical (lbs): " + wtActiveRounded;
+    }
+})();
+</script>
+</body>
+</html>
